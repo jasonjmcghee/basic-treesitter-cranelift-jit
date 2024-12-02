@@ -135,7 +135,7 @@ impl CompiledFunction {
 // ===== Parser Implementation =====
 
 fn collect_error_nodes<'a>(node: Node<'a>, errors: &mut Vec<Node<'a>>) {
-    if node.kind() == "ERROR" {
+    if node.kind() == "ERROR" || node.is_missing() {
         errors.push(node);
     }
 
@@ -230,6 +230,7 @@ impl Calculator {
     ) -> MietteResult<CalcValue> {
         self.input_buffer
             .update(new_input, edit_pos, old_end, new_end);
+        self.source = NamedSource::new("calculator", new_input.to_string());
 
         let edit = tree_sitter::InputEdit {
             start_byte: edit_pos,
@@ -756,7 +757,7 @@ mod tests {
         #[test]
         fn test_invalid_operator() {
             let mut calc = setup_test_calculator();
-            let result = calc.update_input("2 / 3", 0, 0, 5);
+            let result = calc.update_input("2 _ 3", 0, 0, 5);
             assert!(matches!(result, Err(_))); // First check if it's an error
 
             if let Err(e) = result {
@@ -847,19 +848,13 @@ mod tests {
     }
 
     #[test]
-    fn test_invalid_operator() {
-        let output = simulate_calc_input("1 / 2");
-        assert!(output.contains("Invalid operator"));
-    }
-
-    #[test]
     fn test_mixed_type_calculation() {
         let output = simulate_calc_input("1 + 2.5");
         assert!(output.contains("= Float(3.5)"));
     }
 
     #[test]
-    fn test_complex_expression() {
+    fn test_slightly_complex_expression() {
         let output = simulate_calc_input("1 + 2 * 3");
         assert!(output.contains("= Integer(7)"));
     }
@@ -867,7 +862,7 @@ mod tests {
     // Test error formatting specifically
     #[test]
     fn test_error_formatting() {
-        let mut handler = GraphicalReportHandler::new()
+        let handler = GraphicalReportHandler::new()
             .with_context_lines(2)
             .with_links(false);
 

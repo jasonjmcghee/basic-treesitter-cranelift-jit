@@ -1,4 +1,5 @@
 use miette::{Diagnostic, NamedSource, SourceSpan};
+use std::cmp::max;
 use thiserror::Error;
 
 #[derive(Error, Debug, Diagnostic)]

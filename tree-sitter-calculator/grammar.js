@@ -19,7 +19,7 @@ module.exports = grammar({
         expression: $ => choice(
             $.number,
             $.float,
-            $.parenthesized_expression,  // Add support for parentheses
+            $.parenthesized_expression,
             $.binary_expression,
         ),
 
@@ -40,6 +40,13 @@ module.exports = grammar({
         ),
 
         binary_expression: $ => choice(
+            ..."!@#$%^&,.=_~".split("").map((op) =>
+                prec.left(0, seq(
+                    field('left', $.expression),
+                    field('operator', op),
+                    field('right', $.expression)
+                ))
+            ),
             prec.left(1, seq(
                 field('left', $.expression),
                 field('operator', "-"),

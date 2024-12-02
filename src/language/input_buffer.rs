@@ -37,7 +37,6 @@ impl InputBuffer {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::language::input_buffer::InputBuffer;
 
     #[test]
