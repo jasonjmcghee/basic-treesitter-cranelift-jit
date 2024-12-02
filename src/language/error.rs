@@ -22,6 +22,7 @@ pub enum CalcErrorKind {
     #[error("Invalid syntax")]
     ParseError(String),
 
+    #[allow(dead_code)]
     #[error("Type mismatch: {0}")]
     TypeMismatch(String),
 
@@ -37,6 +38,7 @@ pub enum CalcErrorKind {
     #[error("Invalid number: {0}")]
     NumberError(String),
 
+    #[allow(dead_code)]
     #[error("System error: {0}")]
     SystemError(String),
 }

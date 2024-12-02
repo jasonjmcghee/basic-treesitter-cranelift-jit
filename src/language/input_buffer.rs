@@ -13,7 +13,13 @@ impl InputBuffer {
         }
     }
 
-    pub(crate) fn update(&mut self, new_input: &str, edit_pos: usize, old_end: usize, new_end: usize) {
+    pub(crate) fn update(
+        &mut self,
+        new_input: &str,
+        edit_pos: usize,
+        old_end: usize,
+        new_end: usize,
+    ) {
         let new_len = self.bytes.len() - (old_end - edit_pos) + (new_end - edit_pos);
         if self.bytes.capacity() < new_len {
             self.bytes.reserve(new_len - self.bytes.len());
@@ -31,8 +37,8 @@ impl InputBuffer {
 
 #[cfg(test)]
 mod tests {
-    use crate::language::input_buffer::InputBuffer;
     use super::*;
+    use crate::language::input_buffer::InputBuffer;
 
     #[test]
     fn test_input_buffer_new() {

@@ -1,5 +1,20 @@
+use std::process::Command;
+
 fn main() {
     let src_dir = std::path::Path::new("src");
+
+    println!("cargo:rerun-if-changed=grammar.js");
+    println!("cargo:rerun-if-changed=src");
+
+    // Generate the parser using tree-sitter CLI
+    let status = Command::new("tree-sitter")
+        .arg("generate")
+        .status()
+        .expect("Failed to run tree-sitter generate. Is tree-sitter CLI installed?");
+
+    if !status.success() {
+        panic!("Failed to generate parser");
+    }
 
     let mut c_config = cc::Build::new();
     c_config.std("c11").include(src_dir);

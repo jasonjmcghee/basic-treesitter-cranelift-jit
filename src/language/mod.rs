@@ -1,6 +1,8 @@
-mod input_buffer;
 mod error;
+mod input_buffer;
 
+use crate::language::error::{CalcErrorKind, CalculatorError};
+use crate::language::input_buffer::InputBuffer;
 use ahash::AHasher;
 use cranelift::prelude::*;
 use cranelift_jit::{JITBuilder, JITModule};
@@ -14,8 +16,6 @@ use std::{
     time::{Duration, Instant},
 };
 use tree_sitter::Node;
-use crate::language::error::{CalcErrorKind, CalculatorError};
-use crate::language::input_buffer::InputBuffer;
 
 // ===== AST Structures =====
 
@@ -242,12 +242,12 @@ impl Calculator {
         } else {
             self.parser.parse(self.input_buffer.as_str(), None)
         }
-            .ok_or_else(|| CalculatorError {
-                src: self.source.clone(),
-                span: (0, new_input.len()).into(),
-                kind: CalcErrorKind::ParseError("Failed to parse input".to_string()),
-                help: Some("Make sure your expression is syntactically valid".to_string()),
-            })?;
+        .ok_or_else(|| CalculatorError {
+            src: self.source.clone(),
+            span: (0, new_input.len()).into(),
+            kind: CalcErrorKind::ParseError("Failed to parse input".to_string()),
+            help: Some("Make sure your expression is syntactically valid".to_string()),
+        })?;
 
         self.cache.last_tree = Some(tree.clone());
 
@@ -268,13 +268,10 @@ impl Calculator {
             return Err(CalculatorError {
                 src: self.source.clone(),
                 span: span.into(),
-                kind: CalcErrorKind::ParseError(format!(
-                    "Syntax error near '{}'",
-                    error_message
-                )),
+                kind: CalcErrorKind::ParseError(format!("Syntax error near '{}'", error_message)),
                 help: Some("Ensure that your expression follows the correct syntax.".into()),
             }
-                .into());
+            .into());
         }
 
         let ast = self.node_to_expr(new_input, tree.root_node())?;
@@ -410,10 +407,7 @@ impl Calculator {
             _ => Err(CalculatorError {
                 src: self.source.clone(),
                 span: (span.start, span.end - span.start).into(),
-                kind: CalcErrorKind::ParseError(format!(
-                    "Unexpected node type '{}'",
-                    node.kind()
-                )),
+                kind: CalcErrorKind::ParseError(format!("Unexpected node type '{}'", node.kind())),
                 help: Some("Expression must be a number, float, or binary operation".into()),
             })?,
         }
@@ -477,8 +471,12 @@ impl Calculator {
         let fn_ptr = jit_module.get_finalized_function(id);
 
         Ok(match return_type {
-            CalcValue::Integer(_) => CompiledFunction::new_int(unsafe { std::mem::transmute(fn_ptr) }),
-            CalcValue::Float(_) => CompiledFunction::new_float(unsafe { std::mem::transmute(fn_ptr) }),
+            CalcValue::Integer(_) => {
+                CompiledFunction::new_int(unsafe { std::mem::transmute(fn_ptr) })
+            }
+            CalcValue::Float(_) => {
+                CompiledFunction::new_float(unsafe { std::mem::transmute(fn_ptr) })
+            }
         })
     }
 
@@ -517,9 +515,9 @@ impl Calculator {
                 let (left_val, left_ir) = self.compile_node(input, builder, left)?;
                 let (right_val, right_ir) = self.compile_node(input, builder, right)?;
 
-                let needs_float = matches!(op, BinaryOpKind::Divide) ||
-                    matches!(&left_val, CalcValue::Float(_)) ||
-                    matches!(&right_val, CalcValue::Float(_));
+                let needs_float = matches!(op, BinaryOpKind::Divide)
+                    || matches!(&left_val, CalcValue::Float(_))
+                    || matches!(&right_val, CalcValue::Float(_));
 
                 let (final_left, final_right) = if needs_float {
                     let float_left = match &left_val {
@@ -545,7 +543,14 @@ impl Calculator {
                     (BinaryOpKind::Divide, _) => builder.ins().fdiv(final_left, final_right),
                 };
 
-                Ok((if needs_float { CalcValue::Float(0.0) } else { CalcValue::Integer(0) }, result))
+                Ok((
+                    if needs_float {
+                        CalcValue::Float(0.0)
+                    } else {
+                        CalcValue::Integer(0)
+                    },
+                    result,
+                ))
             }
         }
     }
@@ -568,9 +573,9 @@ impl Calculator {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::language::error::{CalcErrorKind, CalculatorError};
     use crossterm::terminal;
     use miette::GraphicalReportHandler;
-    use crate::language::error::{CalcErrorKind, CalculatorError};
 
     // Helper function to create a controlled test environment
     fn setup_test_calculator() -> Calculator {

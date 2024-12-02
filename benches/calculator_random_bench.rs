@@ -1,6 +1,6 @@
+use adder_treesitter_cranelift::language::Calculator;
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use rand::prelude::*;
-use adder_treesitter_cranelift::language::Calculator;
 
 #[derive(Clone)]
 struct ExpressionConfig {
@@ -93,7 +93,7 @@ fn benchmark_calculator_update(c: &mut Criterion) {
                 black_box(expr),
                 black_box(0),
                 black_box(0),
-                black_box(expr.len())
+                black_box(expr.len()),
             )
         });
     });
@@ -118,7 +118,7 @@ fn benchmark_calculator_update(c: &mut Criterion) {
                     black_box(expr),
                     black_box(0),
                     black_box(0),
-                    black_box(expr.len())
+                    black_box(expr.len()),
                 )
             });
         });
