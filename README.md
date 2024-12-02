@@ -2,6 +2,10 @@
 
 A basic working example of tree-sitter + cranelift jit.
 
+There's really one core file - I could break it up, but wanted it to be in one place for this basic example.
+
+[The one core file](src/language/mod.rs)
+
 ## Video
 
 This is a bit outdated - was taken before divide was added!
