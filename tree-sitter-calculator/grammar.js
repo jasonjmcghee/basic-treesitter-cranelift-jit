@@ -40,13 +40,15 @@ module.exports = grammar({
         ),
 
         binary_expression: $ => choice(
-            ..."!@#$%^&,.=_~".split("").map((op) =>
+            // Unsupported operators (probably a better way...)
+            ..."!@#$%^&,.=_~|".split("").map((op) =>
                 prec.left(0, seq(
                     field('left', $.expression),
                     field('operator', op),
                     field('right', $.expression)
                 ))
             ),
+            // Supported operators
             prec.left(1, seq(
                 field('left', $.expression),
                 field('operator', "-"),
