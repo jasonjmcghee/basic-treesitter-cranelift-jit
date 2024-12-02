@@ -6,6 +6,8 @@ There's really one core file - I could break it up, but wanted it to be in one p
 
 [The one core file](src/language/mod.rs)
 
+Here's the [grammar](./tree-sitter-calculator/grammar.js).
+
 ## Video
 
 This is a bit outdated - was taken before divide was added!
@@ -43,6 +45,6 @@ And a more basic, non-random one
 
 ## Modifying things
 
-If you modify the grammar, `cargo build` in the main project will update everything as needed.
+If you modify the [grammar](./tree-sitter-calculator/grammar.js), `cargo build` in the main project will update everything as needed.
 
 The main binary uses syntax highlighting as an example of that.

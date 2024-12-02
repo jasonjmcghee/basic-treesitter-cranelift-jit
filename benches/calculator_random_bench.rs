@@ -17,7 +17,7 @@ impl Default for ExpressionConfig {
             max_depth: 3,
             max_terms: 5,
             allow_floats: true,
-            allow_parens: false,
+            allow_parens: true,
             allow_negatives: true,
         }
     }
@@ -72,7 +72,7 @@ fn benchmark_calculator_update(c: &mut Criterion) {
         max_depth: 3,
         max_terms: 4,
         allow_floats: true,
-        allow_parens: false,
+        allow_parens: true,
         allow_negatives: true,
     };
 

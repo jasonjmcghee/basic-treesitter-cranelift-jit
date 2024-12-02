@@ -28,6 +28,7 @@ pub enum Expr {
         op: BinaryOpKind,
         right: Box<Expr>,
     },
+    Parenthesized(Box<Expr>),
 }
 
 impl Hash for Expr {
@@ -46,6 +47,10 @@ impl Hash for Expr {
                 left.hash(state);
                 op.hash(state);
                 right.hash(state);
+            }
+            Expr::Parenthesized(inner) => {
+                3_u8.hash(state);
+                inner.hash(state);
             }
         }
     }
@@ -328,6 +333,19 @@ impl Calculator {
                 })?;
                 self.node_to_expr(input, child)
             }
+            "parenthesized_expression" => {
+                // Find the inner expression (skip the parentheses)
+                let inner = node
+                    .child_by_field_name("inner")
+                    .ok_or_else(|| CalculatorError {
+                        src: NamedSource::new("calculator", input.to_string()),
+                        span: (span.start, span.end - span.start).into(),
+                        kind: CalcErrorKind::ParseError("Empty parentheses".into()),
+                        help: Some("Parentheses cannot be empty".into()),
+                    })?;
+                let inner_expr = self.node_to_expr(input, inner)?;
+                Ok(Expr::Parenthesized(Box::new(inner_expr)))
+            }
             "number" => {
                 if let Ok(expr) = node_text.parse().map(Expr::Integer) {
                     Ok(expr)
@@ -493,6 +511,7 @@ impl Calculator {
                     (CalcValue::Integer(0), false)
                 }
             }
+            Expr::Parenthesized(inner) => self.determine_type(inner)?,
         })
     }
 
@@ -552,6 +571,7 @@ impl Calculator {
                     result,
                 ))
             }
+            Expr::Parenthesized(inner) => self.compile_node(input, builder, inner),
         }
     }
 
@@ -878,5 +898,57 @@ mod tests {
 
         // Verify terminal state was preserved
         assert_eq!(terminal::is_raw_mode_enabled().unwrap_or(false), raw_mode);
+    }
+
+    #[test]
+    fn test_parentheses() {
+        let mut calc = Calculator::new().unwrap();
+
+        // Basic parentheses
+        let result = calc.update_input("(2 + 3)", 0, 0, 7);
+        assert!(matches!(result, Ok(CalcValue::Integer(5))));
+
+        // Nested parentheses
+        let result = calc.update_input("(2 + (3 * 4))", 0, 0, 13);
+        assert!(matches!(result, Ok(CalcValue::Integer(14))));
+
+        // Multiple parentheses
+        let result = calc.update_input("(2 + 3) * (4 + 5)", 0, 0, 17);
+        assert!(matches!(result, Ok(CalcValue::Integer(45))));
+
+        // Mixed types in parentheses
+        let result = calc.update_input("(2.5 + 1.5) * 3", 0, 0, 15);
+        if let Ok(CalcValue::Float(val)) = result {
+            assert!((val - 12.0).abs() < f64::EPSILON);
+        } else {
+            panic!("Expected float result");
+        }
+    }
+
+    #[test]
+    fn test_parentheses_errors() {
+        let mut calc = Calculator::new().unwrap();
+
+        // Empty parentheses
+        assert!(matches!(calc.update_input("()", 0, 0, 2), Err(_)));
+
+        // Unclosed parentheses
+        assert!(matches!(calc.update_input("(2 + 3", 0, 0, 6), Err(_)));
+
+        // Unopened parentheses
+        assert!(matches!(calc.update_input("2 + 3)", 0, 0, 6), Err(_)));
+    }
+
+    #[test]
+    fn test_precedence_with_parentheses() {
+        let mut calc = Calculator::new().unwrap();
+
+        // Without parentheses: 2 + 3 * 4 = 14
+        let result1 = calc.update_input("2 + 3 * 4", 0, 0, 9);
+        assert!(matches!(result1, Ok(CalcValue::Integer(14))));
+
+        // With parentheses: (2 + 3) * 4 = 20
+        let result2 = calc.update_input("(2 + 3) * 4", 0, 0, 11);
+        assert!(matches!(result2, Ok(CalcValue::Integer(20))));
     }
 }

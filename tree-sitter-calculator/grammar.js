@@ -6,54 +6,60 @@
 
 /// <reference types="tree-sitter-cli/dsl" />
 // @ts-check
-
 module.exports = grammar({
-  name: 'calculator',
+    name: 'calculator',
 
-  extras: $ => [
-    /\s/
-  ],
+    extras: $ => [
+        /\s/
+    ],
 
-  rules: {
-    source: $ => $.expression,  // Explicitly mark the root
+    rules: {
+        source: $ => $.expression,
 
-    expression: $ => choice(
-        $.number,
-        $.float,
-        $.binary_expression,
-    ),
+        expression: $ => choice(
+            $.number,
+            $.float,
+            $.parenthesized_expression,  // Add support for parentheses
+            $.binary_expression,
+        ),
 
-    number: $ => choice(
-        /[0-9]+/,
-        seq('-', /[0-9]+/),  // Handle negative numbers
-    ),
+        parenthesized_expression: $ => seq(
+            '(',
+            field('inner', $.expression),
+            ')'
+        ),
 
-    float: $ => choice(
-        /[0-9]*\.[0-9]+/,
-        seq('-', /[0-9]*\.[0-9]+/),  // Handle negative floats
-    ),
+        number: $ => choice(
+            /[0-9]+/,
+            seq('-', /[0-9]+/),
+        ),
 
-    binary_expression: $ => choice(
-        prec.left(1, seq(
-            field('left', $.expression),
-            field('operator', "-"),
-            field('right', $.expression)
-        )),
-        prec.left(2, seq(
-            field('left', $.expression),
-            field('operator', "+"),
-            field('right', $.expression)
-        )),
-        prec.left(3, seq(
-            field('left', $.expression),
-            field('operator', "/"),
-            field('right', $.expression)
-        )),
-        prec.left(4, seq(
-            field('left', $.expression),
-            field('operator', "*"),
-            field('right', $.expression)
-        )),
-    )
-  }
+        float: $ => choice(
+            /[0-9]*\.[0-9]+/,
+            seq('-', /[0-9]*\.[0-9]+/),
+        ),
+
+        binary_expression: $ => choice(
+            prec.left(1, seq(
+                field('left', $.expression),
+                field('operator', "-"),
+                field('right', $.expression)
+            )),
+            prec.left(2, seq(
+                field('left', $.expression),
+                field('operator', "+"),
+                field('right', $.expression)
+            )),
+            prec.left(3, seq(
+                field('left', $.expression),
+                field('operator', "/"),
+                field('right', $.expression)
+            )),
+            prec.left(4, seq(
+                field('left', $.expression),
+                field('operator', "*"),
+                field('right', $.expression)
+            )),
+        )
+    }
 });

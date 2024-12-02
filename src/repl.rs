@@ -152,13 +152,6 @@ impl InputState {
             while let Some(m) = matches.next() {
                 captures.extend(m.captures);
             }
-            // Sort by start byte, with longer ranges first when start bytes are equal
-            captures.sort_by_key(|c| {
-                (
-                    c.node.start_byte(),
-                    std::cmp::Reverse(c.node.end_byte() - c.node.start_byte()),
-                )
-            });
 
             // Remove captures that overlap with previous ones
             captures.dedup_by(|a, b| {

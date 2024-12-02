@@ -26,29 +26,29 @@ impl Default for ExpressionConfig {
             max_depth: 3,
             max_terms: 5,
             allow_floats: true,
-            allow_parens: false,
+            allow_parens: true,
             allow_negatives: true,
         }
     }
 }
 
 fn generate_complex_expression(config: &ExpressionConfig) -> String {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     generate_expression(config.max_depth, config, &mut rng)
 }
 
 fn generate_expression(depth: u32, config: &ExpressionConfig, rng: &mut impl rand::Rng) -> String {
-    if depth == 0 || rng.gen_bool(0.3) {
+    if depth == 0 || rng.random_bool(0.3) {
         // Generate terminal (number)
         generate_number(config, rng)
     } else {
         // Decide between binary operation or parenthesized expression
-        if config.allow_parens && depth > 1 && rng.gen_bool(0.4) {
+        if config.allow_parens && depth > 1 && rng.random_bool(0.4) {
             // Parenthesized expression
             format!("({})", generate_expression(depth - 1, config, rng))
         } else {
             // Binary operation
-            let num_terms = rng.gen_range(2..=config.max_terms.min(5));
+            let num_terms = rng.random_range(2..=config.max_terms.min(5));
             let mut expr = generate_expression(depth - 1, config, rng);
 
             for _ in 1..num_terms {
@@ -62,13 +62,13 @@ fn generate_expression(depth: u32, config: &ExpressionConfig, rng: &mut impl ran
 }
 
 fn generate_number(config: &ExpressionConfig, rng: &mut impl rand::Rng) -> String {
-    let is_float = config.allow_floats && rng.gen_bool(0.3);
-    let is_negative = config.allow_negatives && rng.gen_bool(0.3);
+    let is_float = config.allow_floats && rng.random_bool(0.3);
+    let is_negative = config.allow_negatives && rng.random_bool(0.3);
 
     let num = if is_float {
-        format!("{:.2}", rng.gen_range(0.0..1000.0))
+        format!("{:.2}", rng.random_range(0.0..1000.0))
     } else {
-        rng.gen_range(0..1000).to_string()
+        rng.random_range(0..1000).to_string()
     };
 
     if is_negative {
@@ -88,7 +88,7 @@ pub fn run_automated_test(updates_per_second: u32, duration_secs: u64) -> Miette
         max_depth: 3,
         max_terms: 4,
         allow_floats: true,
-        allow_parens: false,
+        allow_parens: true,
         allow_negatives: true,
     };
 

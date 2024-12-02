@@ -66,6 +66,10 @@
         {
           "type": "number",
           "named": true
+        },
+        {
+          "type": "parenthesized_expression",
+          "named": true
         }
       ]
     }
@@ -79,6 +83,22 @@
     "type": "number",
     "named": true,
     "fields": {}
+  },
+  {
+    "type": "parenthesized_expression",
+    "named": true,
+    "fields": {
+      "inner": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      }
+    }
   },
   {
     "type": "source",
@@ -95,6 +115,14 @@
         }
       ]
     }
+  },
+  {
+    "type": "(",
+    "named": false
+  },
+  {
+    "type": ")",
+    "named": false
   },
   {
     "type": "*",
