@@ -2,6 +2,10 @@
 
 A basic working example of tree-sitter + cranelift jit.
 
+## Video
+
+https://github.com/user-attachments/assets/6768b986-63d9-430f-bdec-943869b96b95
+
 ## Testing things
 You can run the repl (using crossterm)
 
