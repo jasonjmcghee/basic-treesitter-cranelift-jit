@@ -4,6 +4,8 @@ A basic working example of tree-sitter + cranelift jit.
 
 ## Video
 
+This is a bit outdated - was taken before divide was added!
+
 https://github.com/user-attachments/assets/6768b986-63d9-430f-bdec-943869b96b95
 
 ## Testing things
