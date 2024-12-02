@@ -401,12 +401,17 @@ impl Calculator {
                         "-" => Ok(BinaryOpKind::Subtract),
                         "*" => Ok(BinaryOpKind::Multiply),
                         "/" => Ok(BinaryOpKind::Divide),
-                        _ => Err(CalculatorError {
-                            src: self.source.clone(),
-                            span: (span.start, span.end - span.start).into(),
-                            kind: CalcErrorKind::InvalidOperator(op_text.to_string()),
-                            help: Some("Only +, -, *, and / operators are supported".into()),
-                        }),
+                        _ => {
+                            let op_node = node.child_by_field_name("operator")
+                                .expect("Operator could not be found.");
+                            let op_span = op_node.start_byte()..op_node.end_byte();
+                            Err(CalculatorError {
+                                src: self.source.clone(),
+                                span: (op_span.start, op_span.end - op_span.start).into(),
+                                kind: CalcErrorKind::InvalidOperator(op_text.to_string()),
+                                help: Some("Only +, -, *, and / operators are supported".into()),
+                            })
+                        },
                     }
                 } else {
                     Err(CalculatorError {
