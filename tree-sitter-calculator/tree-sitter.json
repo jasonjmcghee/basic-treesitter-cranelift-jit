@@ -1,0 +1,35 @@
+{
+  "grammars": [
+    {
+      "name": "calculator",
+      "camelcase": "Calculator",
+      "scope": "source.calculator",
+      "file-types": [
+        ".calculator"
+      ],
+      "injection-regex": "^calculator$"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "Calculator grammar for tree-sitter",
+    "authors": [
+      {
+        "name": "Jason McGhee",
+        "email": "mcghee.j@gmail.com"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/tree-sitter/tree-sitter-calculator"
+    }
+  },
+  "bindings": {
+    "c": true,
+    "go": true,
+    "node": true,
+    "python": true,
+    "rust": true,
+    "swift": true
+  }
+}
