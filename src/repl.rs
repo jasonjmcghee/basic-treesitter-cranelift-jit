@@ -1,4 +1,4 @@
-use crate::language::Calculator;
+use crate::language::{CalcValue, Calculator};
 use crossterm::cursor::MoveTo;
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
 use crossterm::style::{Color, ResetColor, SetBackgroundColor, SetForegroundColor};
@@ -178,14 +178,16 @@ impl InputState {
                 // Set color based on capture name
                 match self.highlight_query.capture_names()[capture.index as usize].as_str() {
                     "operator" => {
-                        execute!(stdout, SetForegroundColor(Color::Yellow)).into_diagnostic()?
+                        execute!(stdout, SetForegroundColor(Color::Green)).into_diagnostic()?
                     }
                     "number" => {
-                        execute!(stdout, SetForegroundColor(Color::Green)).into_diagnostic()?
+                        execute!(stdout, SetForegroundColor(Color::Yellow)).into_diagnostic()?
                     }
                     "float" => {
                         execute!(stdout, SetForegroundColor(Color::Cyan)).into_diagnostic()?
                     }
+                    "punctuation" => execute!(stdout, SetForegroundColor(Color::DarkMagenta))
+                        .into_diagnostic()?,
                     "error" => {
                         execute!(stdout, SetForegroundColor(Color::Red)).into_diagnostic()?
                     }
@@ -303,7 +305,18 @@ pub fn run_repl() -> MietteResult<()> {
                             ) {
                                 Ok(value) => {
                                     execute!(stdout, MoveTo(0, 1)).into_diagnostic()?;
-                                    writeln!(stdout, "= {:?}", value).into_diagnostic()?;
+                                    match value {
+                                        CalcValue::Integer(_) => {
+                                            execute!(stdout, SetForegroundColor(Color::Yellow))
+                                                .into_diagnostic()?
+                                        }
+                                        CalcValue::Float(_) => {
+                                            execute!(stdout, SetForegroundColor(Color::Cyan))
+                                                .into_diagnostic()?
+                                        }
+                                    }
+                                    writeln!(stdout, "= {}", value).into_diagnostic()?;
+                                    execute!(stdout, ResetColor).into_diagnostic()?;
                                     // Return cursor to input line
                                     execute!(stdout, MoveTo(input_state.cursor_position as u16, 0))
                                         .into_diagnostic()?;

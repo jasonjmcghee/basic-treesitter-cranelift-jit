@@ -10,6 +10,7 @@ use cranelift_module::{Linkage, Module};
 use dashmap::DashMap;
 use miette::{NamedSource, Result as MietteResult};
 use parking_lot::{Mutex, RwLock};
+use std::fmt::{Display, Formatter};
 use std::{
     hash::{Hash, Hasher},
     sync::Arc,
@@ -75,6 +76,15 @@ pub enum CalcValue {
 impl Default for CalcValue {
     fn default() -> Self {
         CalcValue::Integer(0)
+    }
+}
+
+impl Display for CalcValue {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CalcValue::Integer(i) => write!(f, "{}", i),
+            CalcValue::Float(x) => write!(f, "{}", x),
+        }
     }
 }
 

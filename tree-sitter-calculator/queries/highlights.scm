@@ -1,6 +1,9 @@
 ; Operators
 (binary_expression
-  operator: ["+" "*"] @operator)
+  operator: ["+" "*" "-" "/"] @operator)
+
+; Parens
+["(" ")"] @punctuation
 
 ; Numbers
 (number) @number
